@@ -20,7 +20,7 @@ class Charter_Boat_Woo_API {
 
     public function register_routes(){
        
-        register_rest_route( 'charter-bookings-pro/v2', 'get-bookings-from-orders/', array(
+        register_rest_route( 'charter-boat-bookings/v3', 'get-bookings-from-orders/', array(
             'methods' => 'POST',
             'callback' =>array($this, 'get_bookings_from_orders'),
             'permission_callback' => '__return_true'
@@ -33,7 +33,6 @@ class Charter_Boat_Woo_API {
             return new \WP_Error( 'no_permission', 'Invalid user', array( 'status' => 404 ) );
         } else {
             $charter_bookings = new Charter_Boat_Booking_Orders();
-            $charter_bookings->get_charter_boat_products();
             return $charter_bookings;
         }
     }
@@ -63,8 +62,8 @@ class Charter_Boat_Woo_API {
             foreach($products as $product_id){
                 $woocommerce_rest = new Client(
                     site_url(),
-                    'ck_19e5c07cd794f086d8f08c1e927a0f5f5e3ab383',
-                    'cs_9eb468f3dc7b6d33541c427b99593689233096b1',
+                    WP_WC_PUBLIC,
+                    WP_WC_PRIVATE,
                     [
                     'version' => 'wc/v3',
                     ]

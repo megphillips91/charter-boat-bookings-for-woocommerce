@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Charter Boat Booking Payments
  * Plugin URI: http://msp-media.org/projects/plugins/charter-boat-booking-payments
- * Description: Charter Boat Bookings Payments integrates with WooCommerce enabling paid booking reservations and final payments.
+ * Description: Charter Boat Booking Payments integrates with WooCommerce enabling paid booking reservations and final payments.
  * Author: Meg Phillips
  * Author URI: http://msp-media.org/
  * Version: 0.0.1
@@ -12,6 +12,7 @@
  * Requires at least: 5.9
  * WC requires at least: 3.8
  * WC tested up to: 4.6.1
+ * Text Domain: charter-boat-bookings
  *
  */
 
@@ -44,10 +45,8 @@ if ( ! defined( 'ABSPATH' ) ) {
   */
 
 require_once plugin_dir_path( __FILE__ ) . 'rest-api.php';
-require_once plugin_dir_path( __FILE__ ) . 'helper-functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'woo-webhooks.php';
-
-
+require_once plugin_dir_path( __FILE__ ) . 'class-booking-orders.php';
 
 
 /**
@@ -57,14 +56,29 @@ require_once plugin_dir_path( __FILE__ ) . 'woo-webhooks.php';
 * =======================================
 */
 
-register_activation_hook( __FILE__, __NAMESPACE__ . '\\cb_check_for_woo' );
+add_action( 'plugins_loaded', __NAMESPACE__.'\\cb_check_for_woo' );
 function cb_check_for_woo() {
 
-	if ( ! $this->woocommerce_is_active() ) {
-
-		deactivate_plugins( plugin_basename( __FILE__ ) );
-		unset( $_GET['activate'] ); // Input var okay.
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', __NAMESPACE__.'\\cbb_woocommerce_missing_notice' );
+		return;
 	}
+/*
+	if ( ! class_exists( 'Charter_Boat' ) ) {
+		add_action( 'admin_notices', __NAMESPACE__.'\\charter_boat_bookings_missing_notice' );
+		return;
+	}
+*/
+}
+
+function cbb_woocommerce_missing_notice() {
+	/* translators: 1. URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Charter Boat Booking Payments requires WooCommerce to be installed and active. You can download %s here.', 'charter-boat-bookings' ), '<a href="https://woocommerce.com" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+}
+
+function charter_boat_bookings_missing_notice() {
+	/* translators: 1. URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Charter Boat Booking Payments requires Charter Boat Bookings to be installed and active. You can download %s here.', 'charter-boat-bookings' ), '<a href="https://msp-media.org" target="_blank">Charter Boat Bookings</a>' ) . '</strong></p></div>';
 }
 
 
