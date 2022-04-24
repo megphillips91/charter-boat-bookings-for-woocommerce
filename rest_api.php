@@ -32,7 +32,9 @@ class Charter_Boat_Woo_API {
         if( !current_user_can('manage_woocommerce') ){
             return new \WP_Error( 'no_permission', 'Invalid user', array( 'status' => 404 ) );
         } else {
-            
+            $charter_bookings = new Charter_Boat_Booking_Orders();
+            $charter_bookings->get_charter_boat_products();
+            return $charter_bookings;
         }
     }
 

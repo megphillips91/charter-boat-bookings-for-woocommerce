@@ -1,13 +1,17 @@
 <?php
 /**
- * Plugin Name: Charter Boat Bookings For WooCommerce
- * Plugin URI: http://msp-media.org/projects/plugins/charter-bookings
- * Description: Charter Boat Bookings For WooCommerce enables paid booking reservations and final payments.
- * Contributors: megphillips91
+ * Plugin Name: Charter Boat Booking Payments
+ * Plugin URI: http://msp-media.org/projects/plugins/charter-boat-booking-payments
+ * Description: Charter Boat Bookings Payments integrates with WooCommerce enabling paid booking reservations and final payments.
+ * Author: Meg Phillips
  * Author URI: http://msp-media.org/
- * Version: 1.7.1
+ * Version: 0.0.1
  * License: GPL2+
- * http://www.gnu.org/licenses/gpl-3.0.html
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+ * Requires PHP: 7.4
+ * Requires at least: 5.9
+ * WC requires at least: 3.8
+ * WC tested up to: 4.6.1
  *
  */
 

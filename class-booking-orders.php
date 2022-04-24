@@ -23,6 +23,10 @@ class Charter_Boat_Booking_Orders {
         $this->charter_boat_product_ids = \wc_get_products( $args );
     }
 
+    protected function get_bookings_from_woo(){
+
+    }
+
     
 
 }
