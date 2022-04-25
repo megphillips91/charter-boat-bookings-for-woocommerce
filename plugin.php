@@ -47,6 +47,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once plugin_dir_path( __FILE__ ) . 'rest-api.php';
 require_once plugin_dir_path( __FILE__ ) . 'woo-webhooks.php';
 require_once plugin_dir_path( __FILE__ ) . 'class-booking-orders.php';
+require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
+
 
 
 /**
