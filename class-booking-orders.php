@@ -31,14 +31,20 @@ class Charter_Boat_Booking_Orders {
                 $product_id = $item->product_id;
                 $product = wc_get_product($product_id); //get product
                 $variation_id = $item->variation_id;
+                $meta_data = $item->meta_data;
+                
+                
+                $datetime_meta_string = trim($this->filter_item_meta($meta_data, 'Date').' '.$this->filter_item_meta($meta_data, 'Start Time'));
+                $datetime_meta_string = trim($this->clean_date_for_parse($datetime_meta_string));
+                $charter_args['date_string'] = $datetime_meta_string;
+                $charter_args['date_parse'] = date_parse($datetime_meta_string);
                 //booking fields
                 $charter_args['booking_status'] = get_post_meta($item->variation_id, 'attribute_pa__cb_type', true).' '. $this_order->status;
-                $date = get_post_meta($item->variation_id, 'attribute_pa__cb_date', true);
-                $start_time = $this->attribute_to_time( get_post_meta($item->variation_id, 'attribute_pa__cb_start_time', true) );
-                $charter_args['start_datetime'] = $date.' '.$start_time;
-                $charter_args['duration'] = get_post_meta($item->variation_id, 'attribute_pa__cb_duration', true);
-                $charter_args['start_location'] = get_post_meta($item->variation_id, 'attribute_pa__cb_location', true);
-                $charter_args['end_location'] = get_post_meta($item->variation_id, 'attribute_pa__cb_location', true);
+                //$date = new DateTime($datetime_meta_string, new DateTimeZone(get_option('timezone_string')));
+                //$charter_args['start_datetime'] = $date->format('Y-m-d H:i:s');
+                $charter_args['duration'] = $this->filter_item_meta($meta_data, 'Duration');
+                $charter_args['start_location'] = $this->filter_item_meta($meta_data, 'Location');
+                $charter_args['end_location'] = $this->filter_item_meta($meta_data, 'Location');
                 $charter_args['tickets'] = $item->quantity;
                 $charter_args['is_private'] = $product->get_sold_individually();
                 $charter_args['customer_email'] = $this_order->billing->email;
@@ -59,6 +65,7 @@ class Charter_Boat_Booking_Orders {
             }
             $this->charters[] = $charter_args;
     }
+
 
     /**
      * ============= polling functions ================
@@ -112,6 +119,31 @@ class Charter_Boat_Booking_Orders {
     }
 
     /**
+     * Item meta comes back as an array of objects
+     * 
+     * @param array meta_array is the line_item->meta_data array of objects
+     * @param string meta_key is the key of the meta you need
+     */
+    private function filter_item_meta($meta_array, $meta_key){
+        foreach($meta_array as $meta_object){ //these will be objects
+            if($meta_object->key === $meta_key){
+                return $meta_object->value;
+            }
+        }
+    }
+
+    /**
+     * clean date for parse
+     */
+    private function clean_date_for_parse($datetime_string){
+        $err = array( 'EDT', 'EST', 'Mon,', 'Tue,', 'Wed,', 'Thu,', 'Fri,', 'Sat,', 'Sun,' );
+        foreach($err as $string){
+            $datetime_string = str_replace($string, '', $datetime_string);
+        }
+        return $datetime_string;
+    }
+
+    /**
      * Get time from attribute. Add the colon between hours:mins
      */
     private function attribute_to_time($start_time_attribute){
@@ -134,7 +166,4 @@ class Charter_Boat_Booking_Orders {
        return array('H'=>$duration_hours, 'M'=>$duration_minutes);
    }
 
-
-    
-
-}
+} // end class

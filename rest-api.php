@@ -19,21 +19,25 @@ class Charter_Boat_Woo_API {
 
     public function register_routes(){
        
-        register_rest_route( 'charter-boat-bookings/v3', 'get-bookings-from-orders/', array(
+        register_rest_route( 'charter-boat-bookings/v3', 'insert-bookings-from-orders/', array(
             'methods' => 'POST',
-            'callback' =>array($this, 'get_bookings_from_all_orders'),
+            'callback' =>array($this, 'insert_bookings_from_all_orders'),
             'permission_callback' => '__return_true'
             ) );
             
     }
 
-    public function get_bookings_from_all_orders(){
+    public function insert_bookings_from_all_orders(){
         if( !current_user_can('manage_woocommerce') ){
             return new \WP_Error( 'no_permission', 'Invalid user', array( 'status' => 404 ) );
         } else {
+            $new_bookings = array();
             $charter_bookings = new Charter_Boat_Booking_Orders();
             $charter_bookings->get_charter_booking_orders();
             $charter_bookings->get_charters_from_all_orders();
+            foreach($charter_bookings->charters as $booking_data){
+                //$new_bookings[] = new Insert_Booking_From_Woo_Order($booking_data, '2022');
+            }
             return $charter_bookings;
         }
     }
