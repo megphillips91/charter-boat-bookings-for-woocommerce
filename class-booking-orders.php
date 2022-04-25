@@ -5,7 +5,10 @@ use \DateTimeZone;
 use \DateInterval;
 use Automattic\WooCommerce\Client;
 
-
+/**
+ * So I wrote this considering many orders, but in the normal course of business, we need to consider one order on a webhook
+ * We can poll orders but it makes more sense to have one order at a time...
+ */
 
 /**
  * Charter Boat Bookings Orders
@@ -13,54 +16,15 @@ use Automattic\WooCommerce\Client;
 class Charter_Boat_Booking_Orders {
     public $charters;
     public $charter_boat_product_ids;
-    public $orders_by_charter;
+    private $orders_by_charter;
     
 
     public function __construct(){
         $this->product_orders = array();
         $this->get_charter_boat_products();
-        $this->get_booking_orders();
-        $this->get_charters();
     }
 
-
-    protected function get_charter_boat_products(){
-        global $woocommerce;
-        $response = array();
-        //get charter booking product ids.
-        $args = array(
-            'type' => 'charter_booking',
-            'return'=>'ids',
-            );
-        $this->charter_boat_product_ids = \wc_get_products( $args );
-    }
-
-    protected function get_booking_orders(){
-        foreach($this->charter_boat_product_ids as $product_id){
-            $this->get_orders_by_product($product_id);
-        }
-    }
-
-    protected function get_orders_by_product($product_id){
-        $woocommerce_rest = new Client(
-            site_url(),
-            WP_WC_PUBLIC,
-            WP_WC_PRIVATE,
-            [
-            'version' => 'wc/v3',
-            ]
-        );
-        $params = array(
-            'product'=>$product_id,
-        );  
-        $orders = $woocommerce_rest->get('orders', $params);
-        foreach($orders as $order){
-            $this->orders_by_product[] = $order;
-        }
-    }
-
-    protected function get_charters(){
-        foreach($this->orders_by_product as $this_order){
+    protected function get_charters_from_order($this_order){
             $order_id = $this_order->id;
             $charter_args = array();
             foreach($this_order->line_items as $item){
@@ -68,9 +32,9 @@ class Charter_Boat_Booking_Orders {
                 $product = wc_get_product($product_id); //get product
                 $variation_id = $item->variation_id;
                 //booking fields
-                $charter_args['booking_status'] = get_post_meta($item->variation_id, 'attribute_pa__cb_type', true);
+                $charter_args['booking_status'] = get_post_meta($item->variation_id, 'attribute_pa__cb_type', true).' '. $this_order->status;
                 $date = get_post_meta($item->variation_id, 'attribute_pa__cb_date', true);
-                $start_time = get_post_meta($item->variation_id, 'attribute_pa__cb_start_time', true);
+                $start_time = $this->attribute_to_time( get_post_meta($item->variation_id, 'attribute_pa__cb_start_time', true) );
                 $charter_args['start_datetime'] = $date.' '.$start_time;
                 $charter_args['duration'] = get_post_meta($item->variation_id, 'attribute_pa__cb_duration', true);
                 $charter_args['start_location'] = get_post_meta($item->variation_id, 'attribute_pa__cb_location', true);
@@ -94,6 +58,56 @@ class Charter_Boat_Booking_Orders {
 
             }
             $this->charters[] = $charter_args;
+    }
+
+    /**
+     * ============= polling functions ================
+     * these functions are for patching from the old table to the new table directly from every previous order of a charter boat booking
+     * useful for running cleanup or patches
+     */
+
+    //get all products which are charter boat bookings
+    protected function get_charter_boat_products(){
+        global $woocommerce;
+        $response = array();
+        //get charter booking product ids.
+        $args = array(
+            'type' => 'charter_booking',
+            'return'=>'ids',
+            );
+        $this->charter_boat_product_ids = \wc_get_products( $args );
+    }
+
+    //loop through all the charter boat products and get orders for those products
+    public function get_charter_booking_orders(){
+        foreach($this->charter_boat_product_ids as $product_id){
+            $this->query_orders_by_product($product_id);
+        }
+    }
+    
+    //loop through the returned orders and get the charteres from the order. Put the charters into the charter array
+    public function get_charters_from_all_orders(){
+        foreach($this->orders_by_product as $this_order){
+            $this->get_charters_from_order($this_order);
+        }
+    }
+
+    //WC Rest API call to get orders by product
+    protected function query_orders_by_product($product_id){
+        $woocommerce_rest = new Client(
+            site_url(),
+            WP_WC_PUBLIC,
+            WP_WC_PRIVATE,
+            [
+            'version' => 'wc/v3',
+            ]
+        );
+        $params = array(
+            'product'=>$product_id,
+        );  
+        $orders = $woocommerce_rest->get('orders', $params);
+        foreach($orders as $order){
+            $this->orders_by_product[] = $order;
         }
     }
 
