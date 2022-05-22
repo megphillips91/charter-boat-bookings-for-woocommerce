@@ -9,6 +9,27 @@ use \DateInterval;
 
 $charterboat_rest = new Charter_Boat_Woo_API();
 
+/**
+ * MEGTODO: the hours notice field should have some relation to the cycle of the api updating and sync
+ * so in other words if a captain wants a 4 hours notice, then the sync cycle should be less than 4 hours and should notify the captain every time that it syncs whether or not
+ * there is a new charter. 
+ */
+
+ /**
+  * MEGTODO: it is screwey that the insert charter booking class is in the basic bookings plugin and not an exension inside of the woo_supporting plugin
+  * so we need to figure that out in my mind Where should each peice live and what shoud that extension relationship be
+  * should extensions have access to the namespace nad classes of the parent extension?
+  * 
+  */
+
+ /**
+  * MEGTODO: what happens when there is a new order in woocommerce?
+  * what happens when a payment completes?
+  * what happens when the sync completes?
+  * what happens when a stripe payment fails?
+  * what happens when WC Payments payment fails?
+  */
+
 class Charter_Boat_Woo_API {
     private $timezone;
 
@@ -28,7 +49,7 @@ class Charter_Boat_Woo_API {
     }
 
     public function insert_bookings_from_all_orders(){
-        if( !current_user_can('manage_woocommerce') ){
+        if( !current_user_can('manage_woocommerce') || !user_is_charter_admin() ){
             return new \WP_Error( 'no_permission', 'Invalid user', array( 'status' => 404 ) );
         } else {
             $new_bookings = array();
@@ -36,9 +57,31 @@ class Charter_Boat_Woo_API {
             $charter_bookings->get_charter_booking_orders();
             $charter_bookings->get_charters_from_all_orders();
             foreach($charter_bookings->charters as $booking_data){
-                //$new_bookings[] = new Insert_Booking_From_Woo_Order($booking_data, '2022');
+                $new_bookings[] = new Insert_Booking_From_Woo_Order($booking_data, '2022');
             }
-            return $charter_bookings;
+            return $new_bookings;
+        }
+    }
+
+    /**
+     * checks user permissions
+     */
+    protected function user_has_permission(){
+        if( get_user_meta( get_current_user_id(), 'cb_charter_affiliate', true) === '' && !current_user_can('edit_others_posts') && get_user_meta( get_current_user_id(), 'charter_admin', true) === ''){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * checks if user is a charter admin
+     */
+    protected function user_is_charter_admin(){
+        if( get_user_meta( get_current_user_id(), 'cb_charter_admin', true) === '' && !current_user_can('edit_others_posts') && get_user_meta( get_current_user_id(), 'charter_admin', true) === ''){
+            return false;
+        } else {
+            return true;
         }
     }
 

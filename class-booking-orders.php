@@ -32,16 +32,17 @@ class Charter_Boat_Booking_Orders {
                 $product = wc_get_product($product_id); //get product
                 $variation_id = $item->variation_id;
                 $meta_data = $item->meta_data;
-                
-                
+                //work with the dates 
                 $datetime_meta_string = trim($this->filter_item_meta($meta_data, 'Date').' '.$this->filter_item_meta($meta_data, 'Start Time'));
                 $datetime_meta_string = trim($this->clean_date_for_parse($datetime_meta_string));
-                $charter_args['date_string'] = $datetime_meta_string;
-                $charter_args['date_parse'] = date_parse($datetime_meta_string);
                 //booking fields
                 $charter_args['booking_status'] = get_post_meta($item->variation_id, 'attribute_pa__cb_type', true).' '. $this_order->status;
-                //$date = new DateTime($datetime_meta_string, new DateTimeZone(get_option('timezone_string')));
-                //$charter_args['start_datetime'] = $date->format('Y-m-d H:i:s');
+                if( date_parse($datetime_meta_string)['year'] ){
+                    $start_datetime = new DateTime($datetime_meta_string, new DateTimeZone(get_option('timezone_string')));
+                    $charter_args['start_datetime'] = $start_datetime->format('Y-m-d H:i:s');
+                } else {
+                    $charter_args['start_datetime'] = NULL;
+                }
                 $charter_args['duration'] = $this->filter_item_meta($meta_data, 'Duration');
                 $charter_args['start_location'] = $this->filter_item_meta($meta_data, 'Location');
                 $charter_args['end_location'] = $this->filter_item_meta($meta_data, 'Location');
@@ -50,6 +51,7 @@ class Charter_Boat_Booking_Orders {
                 $charter_args['customer_email'] = $this_order->billing->email;
                 $charter_args['customer_name'] = $this_order->billing->first_name.' '.$this_order->billing->last_name;
                 $charter_args['customer_phone'] = $this_order->billing->phone;
+                $charter_args_args['ota_id'] = $order_id;
                 //booking meta to be saved
                 $charter_meta = array();
                 $charter_meta['product_id'] = $product_id;
@@ -61,7 +63,6 @@ class Charter_Boat_Booking_Orders {
                 $charter_meta['booking_total'] = $item->total;
                 $charter_meta['order_discounts'] = $this_order->discount_total;
                 $charter_args['booking_meta'] = $charter_meta;
-
             }
             $this->charters[] = $charter_args;
     }
