@@ -9,12 +9,6 @@ use \DateInterval;
 
 $charterboat_rest = new Charter_Boat_Woo_API();
 
-/**
- * MEGTODO: the hours notice field should have some relation to the cycle of the api updating and sync
- * so in other words if a captain wants a 4 hours notice, then the sync cycle should be less than 4 hours and should notify the captain every time that it syncs whether or not
- * there is a new charter. 
- */
-
  /**
   * MEGTODO: it is screwey that the insert charter booking class is in the basic bookings plugin and not an exension inside of the woo_supporting plugin
   * so we need to figure that out in my mind Where should each peice live and what shoud that extension relationship be
@@ -40,7 +34,7 @@ class Charter_Boat_Woo_API {
 
     public function register_routes(){
        
-        register_rest_route( 'charter-boat-bookings/v3', 'insert-bookings-from-orders/', array(
+        register_rest_route( 'charter-boat-bookings/v3', 'insert-bookings-from-woo-orders/', array(
             'methods' => 'POST',
             'callback' =>array($this, 'insert_bookings_from_all_orders'),
             'permission_callback' => '__return_true'
@@ -49,7 +43,7 @@ class Charter_Boat_Woo_API {
     }
 
     public function insert_bookings_from_all_orders(){
-        if( !current_user_can('manage_woocommerce') || !user_is_charter_admin() ){
+        if( !current_user_can('manage_woocommerce') || !$this->user_is_charter_admin() ){
             return new \WP_Error( 'no_permission', 'Invalid user', array( 'status' => 404 ) );
         } else {
             $new_bookings = array();

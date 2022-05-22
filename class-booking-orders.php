@@ -51,7 +51,7 @@ class Charter_Boat_Booking_Orders {
                 $charter_args['customer_email'] = $this_order->billing->email;
                 $charter_args['customer_name'] = $this_order->billing->first_name.' '.$this_order->billing->last_name;
                 $charter_args['customer_phone'] = $this_order->billing->phone;
-                $charter_args_args['ota_id'] = $order_id;
+                $charter_args['ota_id'] = $order_id;
                 //booking meta to be saved
                 $charter_meta = array();
                 $charter_meta['product_id'] = $product_id;
