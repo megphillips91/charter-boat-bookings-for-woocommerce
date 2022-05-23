@@ -33,12 +33,13 @@ class Charter_Boat_Woo_API {
     }
 
     public function register_routes(){
-       
+       /*
         register_rest_route( 'charter-boat-bookings/v3', 'insert-bookings-from-woo-orders/', array(
             'methods' => 'POST',
             'callback' =>array($this, 'insert_bookings_from_all_orders'),
             'permission_callback' => '__return_true'
             ) );
+        */
             
     }
 
