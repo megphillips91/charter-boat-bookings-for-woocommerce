@@ -9,7 +9,7 @@
  * License: GPL2+
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  * Requires PHP: 7.4
- * Requires at least: 5.9
+ * Requires at least: 5.8.4
  * WC requires at least: 3.8
  * WC tested up to: 4.6.1
  * Text Domain: charter-boat-bookings
@@ -65,22 +65,12 @@ function cb_check_for_woo() {
 		add_action( 'admin_notices', __NAMESPACE__.'\\cbb_woocommerce_missing_notice' );
 		return;
 	}
-/*
-	if ( ! class_exists( 'Charter_Boat' ) ) {
-		add_action( 'admin_notices', __NAMESPACE__.'\\charter_boat_bookings_missing_notice' );
-		return;
-	}
-*/
+
 }
 
 function cbb_woocommerce_missing_notice() {
 	/* translators: 1. URL link. */
 	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Charter Boat Booking Payments requires WooCommerce to be installed and active. You can download %s here.', 'charter-boat-bookings' ), '<a href="https://woocommerce.com" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
-}
-
-function charter_boat_bookings_missing_notice() {
-	/* translators: 1. URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Charter Boat Booking Payments requires Charter Boat Bookings to be installed and active. You can download %s here.', 'charter-boat-bookings' ), '<a href="https://msp-media.org" target="_blank">Charter Boat Bookings</a>' ) . '</strong></p></div>';
 }
 
 
