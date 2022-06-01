@@ -113,10 +113,12 @@ class Charter_Boat_Booking_Orders {
         $params = array(
             'product'=>$product_id,
         );  
+        //MEGTODO: need to loop do while for all pages so do while the link rel="next"
         $orders = $woocommerce_rest->get('orders', $params);
         foreach($orders as $order){
             $this->orders_by_product[] = $order;
         }
+        //end do while here
     }
 
     /**
